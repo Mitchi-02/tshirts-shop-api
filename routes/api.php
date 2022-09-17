@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,11 +22,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::controller(AuthController::class)->group(function(){
-    
+Route::prefix('customer')->controller(AuthController::class)->group(function(){
     //authentification routes
-   Route::post('/register', 'register');
-   Route::post('/login', 'login');
-   Route::post('/logout', 'logout')->middleware("auth:sanctum");
+    Route::middleware('guestSanctum')->group(function () {
+        Route::post('/register', 'registerUser');
+        Route::post('/login', 'loginUser');
+        Route::get('/forgetpassword', function(Request $request){
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
+         
+            return $request->only('email');
+            });
+        });
 
+   Route::post('/logout', 'logoutUser')->middleware("auth:sanctum");
 });

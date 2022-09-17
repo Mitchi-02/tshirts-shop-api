@@ -46,5 +46,13 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+        $this->renderable(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => "Vous n'êtes pas connecté",
+                ], 401);
+            }
+        });
     }
 }
