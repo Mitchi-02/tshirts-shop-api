@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Repositories\UserRepository;
 
-class AuthController
+class AuthController extends BaseController
 {
     private $userRepository;
     public function __construct(UserRepository $userRepository)
@@ -14,62 +14,20 @@ class AuthController
 
     public function loginUser(Request $request) {
         $response = $this->userRepository->login($request);
-        if($response["success"]) {
-            return response()->json([
-                'status' => 1,
-                'message' => $response['message'],
-                'customer' => [
-                    'id' => $response['data']['user_id'],
-                    'name' => $response['data']['user_name'],
-                ],
-                'contacts' => [
-                    'email' => $response['data']['user_email'],
-                ],
-                'token' => $response['data']['token'],
-            ], 200);
-        }
-        else {
-            return response()->json([
-                'status' => 0,
-                'message' => $response['message'],
-            ]);
-        }
+        if(isset($response["error"])) return $this->sendError($response['error']);
+
+        return $this->sendSuccessAuthentification("Utilisateur connecté avec succès", $response['data']);
     }
 
     public function registerUser(Request $request) {
         $response = $this->userRepository->register($request);
-        if($response["success"]) {
-            return response()->json([
-                'status' => 1,
-                'message' => $response['message'],
-                'customer' => [
-                    'id' => $response['data']['user_id'],
-                    'name' => $response['data']['user_name'],
-                ],
-                'contacts' => [
-                    'email' => $response['data']['user_email'],
-                ],
-                'token' => $response['data']['token'],
-            ], 200);
-        }
-        else {
-            return response()->json([
-                'status' => 0,
-                'message' => $response['message'],
-            ]);
-        }
+        if(isset($response["error"])) return $this->sendError($response['error']);
+
+        return $this->sendSuccessAuthentification("Le compte a éte créé avec succès. Un code de vérification a été envoyé a votre email", $response['data']);
     }
 
     public function logoutUser(Request $request) {
-        $response = $this->userRepository->logout($request);
-        return response()->json([
-            'status' => 1,
-            'message' => $response['message'],
-        ], 200);
-    }
-
-    public function resetPasswordLink(Request $request){
-        $response = $this->userRepository->sendResetPasswordLink($request);
-        
+        $this->userRepository->logout($request);
+        return $this->sendSuccess("Utilisateur déconnecté avec succès");
     }
 }

@@ -12,5 +12,16 @@ interface UserInterface
 
     public function logout (Request $request);
 
-    public function sendResetPasswordLink (Request $request);
+    public function sendResetPasswordCode (Request $request);
+
+    public function verifyResetPasswordCode(Request $request);
+
+    public function resetPassword(Request $request);
+
+    public function resendEmailVerificationCode ();
+
+    public function verifyEmailVerificationCode(Request $request);
+
+    public function updateUserPassword(Request $request);
+
 }

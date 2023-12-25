@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,19 +24,45 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::prefix('customer')->controller(AuthController::class)->group(function(){
-    //authentification routes
-    Route::middleware('guestSanctum')->group(function () {
-        Route::post('/register', 'registerUser');
-        Route::post('/login', 'loginUser');
-        Route::get('/forgetpassword', function(Request $request){
-            $status = Password::sendResetLink(
-                $request->only('email')
-            );
-         
-            return $request->only('email');
-            });
+Route::prefix('customer')->group(function(){
+    //authentification end points
+    Route::controller(AuthController::class)->group(function(){
+        Route::middleware('guestSanctum')->group(function () {
+            Route::post('/register', 'registerUser');
+            Route::post('/login', 'loginUser');
+        });
+        Route::post('/logout', 'logoutUser')->middleware("auth:sanctum");
+    });
+
+    Route::controller(UserController::class)->middleware('auth:sanctum')->group(function(){
+        Route::post('/update/password', 'updatePassword');
+    });
+
+    
+    Route::controller(VerificationController::class)->group(function(){
+
+        //reset password end points
+        Route::prefix('forgetpassword')->middleware('guestSanctum')->group(function(){
+            Route::post('/', 'sendPasswordCode');
+            Route::post('/resend', 'sendPasswordCode');
+            Route::post('/verify', 'verifyPasswordCode');
+            Route::post('/reset', 'resetUserPassword');
         });
 
-   Route::post('/logout', 'logoutUser')->middleware("auth:sanctum");
+        //reset password end points
+        Route::prefix('verifyemail')->middleware('auth:sanctum')->group(function(){
+            Route::post('/resend', 'resendEmailVerification');
+            Route::post('/verify', 'verifyEmailVerifCode');
+        });
+            
+    });
+
+    Route::controller(ProductController::class)->middleware('auth:sanctum')->group(function(){
+        Route::get('/home', 'getAllProducts');
+    });
+
+    Route::controller(OrderController::class)->middleware('auth:sanctum')->group(function(){
+        Route::post('/order', 'createOrder');
+        Route::get('/myorders', 'getAuthOrders');
+    });
 });
