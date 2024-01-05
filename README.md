@@ -5,7 +5,7 @@ A Rest API for a soccer tshirts store, built with Laravel 9 (Repository Design P
 It handles user authentication and the ordering process.
  
 ## Get Started
-Don't forget to change your env variables: db connection, .
+Don't forget to change your env variables: db connection, email credentiels.
 ```
 cp .env.example .env
 composer install
